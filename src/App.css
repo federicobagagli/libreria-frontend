@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+/* src/App.css */
+.app-container {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
