@@ -10,8 +10,11 @@ const api = axios.create({
   timeout: 10000,   // Timeout per le richieste (opzionale)
 });
 
-// Funzione per recuperare i libri
-export const getBooks = () => api.get('/books');  // "/books" è l'endpoint per recuperare i libri
+// Funzione per recuperare i libri con filtri
+export const getBooks = (filters = {}) => {
+  const params = new URLSearchParams(filters);  // Converte il filtro in query params
+  return api.get(`/books?${params.toString()}`);
+};
 
 // Puoi aggiungere altre funzioni per altre API, ad esempio:
 // export const createBook = (bookData) => api.post('/books', bookData);
