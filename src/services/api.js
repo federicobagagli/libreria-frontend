@@ -1,8 +1,10 @@
 // src/services/api.js
 import axios from 'axios';
+import API_URL from '../config/apiConfig'; // Vai un livello sopra e poi accedi alla cartella config
+
 
 // URL del backend su Azure
-const API_URL = 'https://federico-azure-ms-12345.azurewebsites.net/api'; // Modifica con l'URL effettivo del tuo backend
+//const API_URL = 'https://federico-azure-ms-12345.azurewebsites.net/api'; // Modifica con l'URL effettivo del tuo backend
 
 // Creiamo un'istanza di axios con baseURL configurata
 const api = axios.create({

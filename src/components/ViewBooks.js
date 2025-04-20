@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_URL from '../config/apiConfig'; // Vai un livello sopra e poi accedi alla cartella config
+
 
 const FIELDS = ['titolo', 'autore', 'genere', 'anno'];
 
@@ -23,13 +25,23 @@ function ViewBooks() {
   const handleInputChange = (field, value) => {
     setFilters((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: field === 'year' ? parseInt(value, 10) : value,
     }));
   };
 
   const handleVisualizza = async () => {
+    const updatedFilters = {
+      title: filters['titolo'] || '',   // Correzione nome campo da 'titolo' a 'title'
+      author: filters['autore'] || '',   // Correzione nome campo da 'autore' a 'author'
+      genre: filters['genere'] || '',    // Correzione nome campo da 'genere' a 'genre'
+      year: filters['anno'] || '',       // Correzione nome campo da 'anno' a 'year'
+    };
+  
     try {
-      const response = await axios.get('/api/books', { params: filters });
+      console.log(updatedFilters);  // Aggiungi log per vedere i parametri inviati
+      console.log('API_URL:', API_URL); 
+      const response = await axios.get(`${API_URL}/books`, { params: updatedFilters });
+      //const response = await axios.get('https://federico-azure-ms-12345.azurewebsites.net/api/books', { params: updatedFilters });
       setBooks(response.data);
     } catch (error) {
       console.error("Errore nella ricerca:", error);
@@ -38,10 +50,11 @@ function ViewBooks() {
       setShowResults(true);
     }
   };
+  
 
   const handleMostraTutti = async () => {
     try {
-      const response = await axios.get("https://federico-azure-ms-12345.azurewebsites.net/api/books/all");
+      const response = await axios.get(`${API_URL}/books/all`);
       setBooks(response.data);
     } catch (error) {
       console.error("Errore nel caricamento di tutti i libri:", error);
@@ -106,8 +119,13 @@ function ViewBooks() {
         <ul style={{ marginTop: '20px' }}>
           {books.map((book) => (
             <li key={book.id}>
-              <strong>{book.title}</strong> - {book.author}
-            </li>
+            {Object.entries(book).map(([key, value]) => (
+              <div key={key}>
+                <strong>{key}:</strong> {value}
+              </div>
+            ))}
+            <hr />
+          </li>
           ))}
         </ul>
       )}
