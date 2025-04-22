@@ -18,7 +18,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+	  "start:local": "cross-env REACT_APP_API_URL=http://localhost:8080/api react-scripts start",
+    "start:azure": "cross-env REACT_APP_API_URL=https://federico-azure-ms-12345.azurewebsites.net/api react-scripts start"
   },
   "eslintConfig": {
     "extends": [
@@ -37,5 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3"
   }
 }

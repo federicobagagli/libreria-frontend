@@ -4,7 +4,7 @@ import Sidebar from "./components/Sidebar";
 import ViewBooks from "./components/ViewBooks";
 import AddBook from "./components/AddBook.js";
 import "./App.css";
-import backgroundImage from './assets/background.jpg';
+import backgroundImage from './assets/3d-background-with-white-cubes.jpg';
 
 
 function App() {

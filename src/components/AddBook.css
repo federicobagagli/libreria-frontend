@@ -1,0 +1,51 @@
+.add-book-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px 80px; /* margini simmetrici a sinistra e destra */
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .add-book-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: capitalize;
+  }
+  
+  .add-book-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .add-book-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-transform: capitalize; /* Prima lettera maiuscola */
+  }
+  
+  .add-book-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .add-book-form button {
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-book-form button:hover {
+    background-color: #27ae60;
+  }
+  
