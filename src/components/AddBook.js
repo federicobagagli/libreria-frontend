@@ -1,15 +1,17 @@
-// src/components/AddBook.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import API_URL from '../config/apiConfig';
 import './AddBook.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { format } from 'date-fns';
 
 const AddBook = () => {
   const [formData, setFormData] = useState({
     title: '',
     author: '',
     genre: '',
-    publishDate: '',
+    publishDate: null,
   });
 
   const [successMessage, setSuccessMessage] = useState('');
@@ -28,9 +30,16 @@ const AddBook = () => {
     setErrorMessage('');
 
     try {
-      await axios.post(`${API_URL}/books/create`, formData);
+      const dataToSend = {
+        ...formData,
+        publishDate: formData.publishDate
+          ? format(formData.publishDate, 'yyyy-MM-dd')
+          : '',
+      };
+
+      await axios.post(`${API_URL}/books/create`, dataToSend);
       setSuccessMessage('Libro aggiunto con successo!');
-      setFormData({ title: '', author: '', genre: '', publishDate: '' });
+      setFormData({ title: '', author: '', genre: '', publishDate: null });
     } catch (error) {
       console.error('Errore durante l\'aggiunta del libro:', error);
       setErrorMessage('Errore durante l\'aggiunta del libro.');
@@ -41,17 +50,49 @@ const AddBook = () => {
     <div className="add-book-container">
       <h1>Inserisci un nuovo libro</h1>
       <form onSubmit={handleSubmit} className="add-book-form">
-        {['title', 'author', 'genre', 'publishDate'].map((field) => (
-          <div key={field}>
-            <label>{field}</label>
-            <input
-              type="text"
-              value={formData[field]}
-              onChange={(e) => handleChange(field, e.target.value)}
-              required
-            />
-          </div>
-        ))}
+        <div>
+          <label>Titolo</label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Autore</label>
+          <input
+            type="text"
+            value={formData.author}
+            onChange={(e) => handleChange('author', e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Genere</label>
+          <input
+            type="text"
+            value={formData.genre}
+            onChange={(e) => handleChange('genre', e.target.value)}
+            required
+          />
+        </div>
+        <div className="datepicker-container">
+          <label>Data di pubblicazione</label>
+          <DatePicker
+            selected={formData.publishDate}
+            onChange={(date) => handleChange('publishDate', date)}
+            dateFormat="yyyy-MM-dd"
+            placeholderText="Seleziona una data"
+            className="custom-datepicker"
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode="select"
+            yearDropdownItemNumber={150}
+            scrollableYearDropdown
+            required
+          />
+        </div>
         <button type="submit">Salva</button>
       </form>
       {successMessage && <p className="success-msg">{successMessage}</p>}

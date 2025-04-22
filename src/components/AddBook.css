@@ -49,3 +49,19 @@
     background-color: #27ae60;
   }
   
+  .date-picker-wrapper {
+    width: 100%;
+  }
+  
+  .date-picker-wrapper .react-datepicker-wrapper {
+    width: 100%;
+  }
+  
+  .react-datepicker__input-container input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  
