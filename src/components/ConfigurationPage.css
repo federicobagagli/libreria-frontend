@@ -1,0 +1,8 @@
+.clickable-table {
+    cursor: pointer;
+  }
+  
+  .clickable-table:hover {
+    text-decoration: underline; /* opzionale: underline al passaggio */
+  }
+  
