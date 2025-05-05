@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 const TableDetailsModal = ({ tableName, onClose }) => {
@@ -17,11 +17,10 @@ const TableDetailsModal = ({ tableName, onClose }) => {
   const [addSuccess, setAddSuccess] = useState(null);
   const [deleteSuccess, setDeleteSuccess] = useState(null);
 
-  useEffect(() => {
-    loadColumns();
-  }, [tableName]);
 
-  const loadColumns = () => {
+  
+
+  const loadColumns = useCallback(() => {
     setLoading(true);
     axios.get(`${process.env.REACT_APP_API_URL}/database/tables/${tableName}/columns`)
       .then(response => {
@@ -33,7 +32,11 @@ const TableDetailsModal = ({ tableName, onClose }) => {
         setError("Errore nel recuperare le colonne.");
         setLoading(false);
       });
-  };
+  }, [tableName]);
+  
+  useEffect(() => {
+    loadColumns();
+  }, [loadColumns]);
 
   const handleGenerateDDL = () => {
     setDdlLoading(true);
