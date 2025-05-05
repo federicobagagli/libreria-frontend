@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import API_URL from '../config/apiConfig'; 
 import './ViewBooks.css';  
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
 
 const FIELDS = ['titolo', 'autore', 'genere', 'anno'];
 
@@ -23,6 +26,29 @@ function ViewBooks() {
       return updated;
     });
   };
+
+  const exportToExcel = () => {
+    console.log("books", books);  // ✅ log 1
+    const worksheet = XLSX.utils.json_to_sheet(books);
+    console.log("worksheet['!ref']", worksheet['!ref']);  // ✅ log 2
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Libreria");
+  
+    if (worksheet['!ref']) {
+      worksheet['!autofilter'] = { ref: worksheet['!ref'] };
+    }
+  
+    const maxColWidths = books.length > 0 ? Object.keys(books[0]).map(key => ({ wch: key.length + 10 })) : [];
+    worksheet['!cols'] = maxColWidths;
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, 'Libreria.xlsx');
+  };
+  
+  
 
   const handleInputChange = (field, value) => {
     setFilters((prev) => ({
@@ -129,13 +155,16 @@ function ViewBooks() {
 
       <div className="action-buttons">
         <button className="visualizza" onClick={handleVisualizza}>Visualizza</button>
+        <button className="show-all" onClick={handleMostraTutti}>Mostra tutti</button>
         <button
-          className="show-all"
-          onClick={handleMostraTutti}
+          className="export-excel"
+          onClick={exportToExcel}
+          disabled={books.length === 0}
         >
-          Mostra tutti
+          Esporta Excel
         </button>
       </div>
+
 
       {showResults && books.length === 0 && <p>Nessun libro trovato.</p>}
 

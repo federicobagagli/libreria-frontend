@@ -197,6 +197,20 @@ const TableDetailsModal = ({ tableName, onClose }) => {
         <div style={{ marginTop: "10px" }}>
           <h4>DDL:</h4>
           <pre style={ddlStyle}>{ddl}</pre>
+          <button
+            style={buttonStyle}
+            onClick={() => {
+                const blob = new Blob([ddl], { type: "text/sql;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${tableName}.sql`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }}
+            >
+      Scarica DDL
+    </button>
         </div>
       )}
 
@@ -206,16 +220,19 @@ const TableDetailsModal = ({ tableName, onClose }) => {
 };
 
 const modalStyle = {
-  position: "fixed",
-  top: "20%",
-  left: "25%",
-  width: "50%",
-  padding: "20px",
-  backgroundColor: "white",
-  border: "1px solid #ccc",
-  boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-  zIndex: 1000,
-};
+    position: "fixed",
+    top: "10%",
+    left: "25%",
+    width: "50%",
+    maxHeight: "80vh",             // 🔥 altezza massima = 80% viewport
+    overflowY: "auto",             // 🔥 attiva scroll verticale se necessario
+    padding: "20px",
+    backgroundColor: "white",
+    border: "1px solid #ccc",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
+    zIndex: 1000,
+  };
+  
 
 const tableStyle = {
   width: "100%",
