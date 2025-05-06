@@ -1,12 +1,13 @@
 // src/components/VoiceAddBook.js
 import React, { useEffect, useRef, useState } from 'react';
 
-const VoiceAddBook = ({ onFieldDetected }) => {
+const VoiceAddBook = ({ onFieldDetected, submitButtonRef }) => {
   const [status, setStatus] = useState("In attesa di 'ok libreria' o clic sul bottone...");
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
-  const commandBuffer = useRef(""); // ✅ buffer condiviso
+  const commandBuffer = useRef("");
 
+  // ✅ Trigger vocale "ok libreria"
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -31,15 +32,41 @@ const VoiceAddBook = ({ onFieldDetected }) => {
       }
     };
 
-    recognition.onerror = (e) => {
-      console.error("Errore recognition trigger:", e);
-    };
+    recognition.onerror = (e) => console.error("Errore recognition trigger:", e);
 
     recognition.start();
     recognitionRef.current = recognition;
 
     return () => recognition.stop();
   }, []);
+
+  // ✅ Listener separato per "salva libro"
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const saveRecognition = new SpeechRecognition();
+    saveRecognition.lang = 'it-IT';
+    saveRecognition.continuous = true;
+    saveRecognition.interimResults = false;
+
+    saveRecognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+      console.log("DEBUG ascoltatore salva transcript:", transcript);
+
+      if (transcript.includes("salva libro") || transcript.includes("conferma inserimento")) {
+        console.log("DEBUG: Comando vocale per SALVA rilevato!");
+        if (submitButtonRef?.current) {
+          submitButtonRef.current.click();  // 👉 Simula click sul bottone
+        }
+      }
+    };
+
+    saveRecognition.onerror = (e) => console.error("Errore ascoltatore salva:", e);
+
+    saveRecognition.start();
+    return () => saveRecognition.stop();
+  }, [submitButtonRef]);
 
   const startCommandRecognition = () => {
     console.log("DEBUG: startCommandRecognition chiamato!");
@@ -49,7 +76,7 @@ const VoiceAddBook = ({ onFieldDetected }) => {
     commandRecognition.interimResults = false;
     commandRecognition.continuous = true;
 
-    setStatus(`Sto ascoltando... chiudi con 'fine libreria'. 
+    setStatus(`Sto ascoltando... chiudi con 'fine libreria'.
 Esempio:
 "titolo Il signore degli anelli fine titolo
 autore Tolkien fine autore
@@ -78,6 +105,7 @@ fine libreria"`);
         const genere = matchGenere ? matchGenere[1].trim() : "";
 
         console.log("Estratto:", { titolo, autore, anno, genere });
+
         const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
         if (titolo) onFieldDetected('title', capitalize(titolo));
         if (autore) onFieldDetected('author', capitalize(autore));
@@ -109,27 +137,25 @@ fine libreria"`);
         try { commandRecognition.abort(); } catch {}
 
         if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch {}
-        recognitionRef.current.start();
+          try { recognitionRef.current.stop(); } catch {}
+          recognitionRef.current.start();
         }
-
       }
     };
 
     commandRecognition.onerror = (e) => {
-        console.error("Errore comando vocale:", e);
-        setStatus("Errore. Riprova a dire 'ok libreria' o clicca il bottone");
-        setListening(false);
-        commandBuffer.current = "";
-        commandRecognition.stop();
-        try { commandRecognition.abort(); } catch {}
-      
-        if (recognitionRef.current) {
-          try { recognitionRef.current.stop(); } catch {}
-          recognitionRef.current.start();
-        }
-      };
-      
+      console.error("Errore comando vocale:", e);
+      setStatus("Errore. Riprova a dire 'ok libreria' o clicca il bottone");
+      setListening(false);
+      commandBuffer.current = "";
+      commandRecognition.stop();
+      try { commandRecognition.abort(); } catch {}
+
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch {}
+        recognitionRef.current.start();
+      }
+    };
 
     commandRecognition.start();
   };
@@ -137,6 +163,9 @@ fine libreria"`);
   return (
     <div style={{ marginTop: '20px', backgroundColor: '#f0f0f0', padding: '10px' }}>
       <p style={{ whiteSpace: 'pre-wrap' }}>{status}</p>
+      <p style={{ fontSize: '12px', color: '#555' }}>
+        Puoi dire "ok libreria" per inserire i dati, o "salva libro" per confermare a voce.
+      </p>
       <button onClick={() => {
         if (!listening) {
           setStatus(`Attivato manualmente! Ora puoi dire i comandi, chiudi con 'fine libreria'.

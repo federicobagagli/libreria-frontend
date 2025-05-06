@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from '../axiosInstance';
 import './AddBook.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
 import VoiceAddBook from "./VoiceAddBook";
+
+
 
 const AddBook = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +15,7 @@ const AddBook = () => {
     genre: '',
     publishDate: null,
   });
-
+  const submitButtonRef = useRef(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -25,7 +27,7 @@ const AddBook = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     setSuccessMessage('');
     setErrorMessage('');
 
@@ -49,7 +51,7 @@ const AddBook = () => {
   return (
     <div className="add-book-container">
       <h1>Inserisci un nuovo libro</h1>
-      <VoiceAddBook onFieldDetected={handleChange} />
+      <VoiceAddBook onFieldDetected={handleChange} submitButtonRef={submitButtonRef} />
 
       <form onSubmit={handleSubmit} className="add-book-form">
         <div>
@@ -95,7 +97,7 @@ const AddBook = () => {
             required
           />
         </div>
-        <button type="submit">Salva</button>
+        <button type="submit" ref={submitButtonRef}>Salva</button>
       </form>
       {successMessage && <p className="success-msg">{successMessage}</p>}
       {errorMessage && <p className="error-msg">{errorMessage}</p>}
