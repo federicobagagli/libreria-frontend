@@ -78,10 +78,10 @@ fine libreria"`);
         const genere = matchGenere ? matchGenere[1].trim() : "";
 
         console.log("Estratto:", { titolo, autore, anno, genere });
-
-        if (titolo) onFieldDetected('title', titolo);
-        if (autore) onFieldDetected('author', autore);
-        if (genere) onFieldDetected('genre', genere);
+        const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+        if (titolo) onFieldDetected('title', capitalize(titolo));
+        if (autore) onFieldDetected('author', capitalize(autore));
+        if (genere) onFieldDetected('genre', capitalize(genere));
 
         if (anno) {
           let dateObj = null;
