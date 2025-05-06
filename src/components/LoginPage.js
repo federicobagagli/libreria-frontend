@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import API_URL from '../config/apiConfig'; // usa la stessa configurazione API
+import axios from '../axiosInstance'; // ✅ usa l'istanza configurata
+import API_URL from '../config/apiConfig';
+
+console.log("API_URL:", API_URL);
 
 function LoginPage({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
@@ -14,9 +16,11 @@ function LoginPage({ onLoginSuccess }) {
         username,
         password
       });
-      const token = response.data.token;
-      localStorage.setItem('token', token); // salviamo il token
-      onLoginSuccess(); // chiamiamo la funzione per notificare successo
+      console.log("DEBUG response.data:", response.data);
+
+      const token = response.data.token ?? response.data; // fallback se backend ritorna solo stringa
+      localStorage.setItem('jwtToken', token); // salva nel localStorage
+      onLoginSuccess(token); // PASSA IL TOKEN QUI ✅
     } catch (err) {
       console.error(err);
       setError('Credenziali non valide');

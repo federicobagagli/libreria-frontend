@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";  // ✅ IMPORTANTE
 import "./Sidebar.css";
 
-const Sidebar = () => {
+const Sidebar = ({ onLogout }) => {
   let role = null;
   const token = localStorage.getItem('token');
 
@@ -32,6 +32,21 @@ const Sidebar = () => {
           </li>
         )}
       </ul>
+      <button
+        onClick={onLogout}
+        style={{
+          marginTop: 'auto',
+          width: '100%',
+          padding: '10px',
+          backgroundColor: '#e74c3c',
+          color: 'white',
+          border: 'none',
+          cursor: 'pointer'
+        }}
+      >
+        Logout
+      </button>
+
     </div>
   );
 };

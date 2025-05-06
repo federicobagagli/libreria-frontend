@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import API_URL from '../config/apiConfig'; 
+import axios from '../axiosInstance'; // usa l'istanza configurata 
 import './ViewBooks.css';  
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -66,7 +65,7 @@ function ViewBooks() {
     };
 
     try {
-      const response = await axios.get(`${API_URL}/books`, { params: updatedFilters });
+      const response = await axios.get(`/books`, { params: updatedFilters });
       setBooks(response.data);
     } catch (error) {
       console.error("Errore nella ricerca:", error);
@@ -78,7 +77,7 @@ function ViewBooks() {
 
   const handleMostraTutti = async () => {
     try {
-      const response = await axios.get(`${API_URL}/books/all`);
+      const response = await axios.get(`/books/all`);
       setBooks(response.data);
     } catch (error) {
       console.error("Errore nel caricamento di tutti i libri:", error);
@@ -92,7 +91,7 @@ function ViewBooks() {
     const confirmDelete = window.confirm('Sei sicuro di voler eliminare questo libro?');
     if (confirmDelete) {
       try {
-        await axios.delete(`${API_URL}/books/${id}`);
+        await axios.delete(`/books/${id}`);
         filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
       } catch (error) {
         console.error('Errore durante l\'eliminazione:', error);
@@ -112,7 +111,7 @@ function ViewBooks() {
 
   const handleSaveChanges = async () => {
     try {
-      await axios.put(`${API_URL}/books/${editingBook.id}`, editingBook);
+      await axios.put(`/books/${editingBook.id}`, editingBook);
       setIsModalOpen(false);
       filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
     } catch (error) {

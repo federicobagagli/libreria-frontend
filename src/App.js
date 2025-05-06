@@ -13,10 +13,13 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleLoginSuccess = (token) => {
+    console.log("DEBUG handleLoginSuccess: token ricevuto:", token);
     localStorage.setItem('jwtToken', token);
     
     try {
       const payload = JSON.parse(atob(token.split('.')[1])); // decodifica payload JWT
+      console.log("DEBUG: token salvato in localStorage:", localStorage.getItem('jwtToken'));
+      console.log("DEBUG payload salvato:", payload);
       localStorage.setItem('userRole', payload.role);
     } catch (e) {
       console.error("Token JWT non valido:", e);
@@ -36,6 +39,7 @@ function App() {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const isExpired = (payload.exp * 1000) < Date.now();
+        console.log("DEBUG payload.exp:", payload.exp, "Date.now():", Date.now(), "exp in ms:", payload.exp * 1000);
         if (isExpired) {
           localStorage.clear();
           setIsLoggedIn(false);
@@ -50,6 +54,10 @@ function App() {
     }
   }, []);
   
+  const handleLogout = () => {
+    localStorage.clear();
+    setIsLoggedIn(false);
+  };
 
   if (!isLoggedIn) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
@@ -58,7 +66,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="app-container">
-        <Sidebar />
+      <Sidebar onLogout={handleLogout} />
         <main
           className="main-content"
           style={{

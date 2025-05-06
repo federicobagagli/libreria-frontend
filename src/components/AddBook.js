@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import API_URL from '../config/apiConfig';
+import axios from '../axiosInstance';
 import './AddBook.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -37,7 +36,7 @@ const AddBook = () => {
           : '',
       };
 
-      await axios.post(`${API_URL}/books/create`, dataToSend);
+      await axios.post(`/books/create`, dataToSend);
       setSuccessMessage('Libro aggiunto con successo!');
       setFormData({ title: '', author: '', genre: '', publishDate: null });
     } catch (error) {
