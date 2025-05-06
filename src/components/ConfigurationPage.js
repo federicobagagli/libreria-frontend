@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from '../axiosInstance'; // ✅ usa l'istanza configurata
 import "./ConfigurationPage.css";
 import TableDetailsModal from "./TableDetailsModal"; // lo creeremo dopo
 console.log("DEBUG TableDetailsModal:", TableDetailsModal);

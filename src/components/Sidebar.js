@@ -5,7 +5,7 @@ import "./Sidebar.css";
 
 const Sidebar = ({ onLogout }) => {
   let role = null;
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('jwtToken');
 
   if (token) {
     try {

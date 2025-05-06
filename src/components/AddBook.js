@@ -4,6 +4,7 @@ import './AddBook.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
+import VoiceAddBook from "./VoiceAddBook";
 
 const AddBook = () => {
   const [formData, setFormData] = useState({
@@ -48,6 +49,8 @@ const AddBook = () => {
   return (
     <div className="add-book-container">
       <h1>Inserisci un nuovo libro</h1>
+      <VoiceAddBook onFieldDetected={handleChange} />
+
       <form onSubmit={handleSubmit} className="add-book-form">
         <div>
           <label>Titolo</label>

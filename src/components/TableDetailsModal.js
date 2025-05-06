@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import axios from '../axiosInstance'; // ✅ usa l'istanza configurata
 
 const TableDetailsModal = ({ tableName, onClose }) => {
   const [columns, setColumns] = useState([]);
