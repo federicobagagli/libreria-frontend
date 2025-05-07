@@ -1,17 +1,15 @@
-// src/components/VoiceAddBook.js
 import React, { useEffect, useRef, useState } from 'react';
 
 const VoiceAddBook = ({ onFieldDetected, submitButtonRef }) => {
-  const [status, setStatus] = useState("In attesa di 'ok libreria' o clic sul bottone...");
-  const recognitionRef = useRef(null);
+  const [status, setStatus] = useState("In attesa di comandi vocali...");
   const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
   const commandBuffer = useRef("");
 
-  // ✅ Trigger vocale "ok libreria"
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert("Il tuo browser non supporta SpeechRecognition!");
+      alert("Il tuo browser non supporta il riconoscimento vocale.");
       return;
     }
 
@@ -21,162 +19,111 @@ const VoiceAddBook = ({ onFieldDetected, submitButtonRef }) => {
     recognition.interimResults = false;
 
     recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-      console.log("DEBUG trigger transcript:", transcript);
+      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+      console.log("DEBUG transcript:", transcript);
 
-      if (!listening && transcript.includes("ok libreria")) {
-        setStatus("Attivato! Ora puoi dire i comandi, chiudi con 'fine libreria'.");
-        setListening(true);
-        recognition.stop();
-        startCommandRecognition();
-      }
-    };
-
-    recognition.onerror = (e) => console.error("Errore recognition trigger:", e);
-
-    recognition.start();
-    recognitionRef.current = recognition;
-
-    return () => recognition.stop();
-  }, []);
-
-  // ✅ Listener separato per "salva libro"
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
-
-    const saveRecognition = new SpeechRecognition();
-    saveRecognition.lang = 'it-IT';
-    saveRecognition.continuous = true;
-    saveRecognition.interimResults = false;
-
-    saveRecognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-      console.log("DEBUG ascoltatore salva transcript:", transcript);
-
-      if (transcript.includes("salva libro") || transcript.includes("conferma inserimento")) {
-        console.log("DEBUG: Comando vocale per SALVA rilevato!");
-        if (submitButtonRef?.current) {
-          submitButtonRef.current.click();  // 👉 Simula click sul bottone
-        }
-      }
-    };
-
-    saveRecognition.onerror = (e) => console.error("Errore ascoltatore salva:", e);
-
-    saveRecognition.start();
-    return () => saveRecognition.stop();
-  }, [submitButtonRef]);
-
-  const startCommandRecognition = () => {
-    console.log("DEBUG: startCommandRecognition chiamato!");
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const commandRecognition = new SpeechRecognition();
-    commandRecognition.lang = 'it-IT';
-    commandRecognition.interimResults = false;
-    commandRecognition.continuous = true;
-
-    setStatus(`Sto ascoltando... chiudi con 'fine libreria'.
-Esempio:
+      if (transcript.includes("ok libreria") && !listening) {
+        setStatus(`Attivato! Ora puoi dire i comandi, chiudi con 'fine libreria'.\nEsempio:
 "titolo Il signore degli anelli fine titolo
 autore Tolkien fine autore
 anno 1954 fine anno
 genere Fantasy fine genere
 fine libreria"`);
+        setListening(true);
+        return;
+      }
 
-    commandRecognition.onresult = (event) => {
-      const partial = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-      console.log("DEBUG partial transcript:", partial);
-
-      commandBuffer.current += " " + partial;
-      console.log("DEBUG commandBuffer:", commandBuffer.current);
-
-      if (commandBuffer.current.includes("fine libreria")) {
-        console.log("DEBUG: trovato 'fine libreria'!");
-
-        const matchTitle = commandBuffer.current.match(/titolo\s+(.*?)(?=\s+fine titolo)/i);
-        const matchAuthor = commandBuffer.current.match(/autore\s+(.*?)(?=\s+fine autore)/i);
-        const matchAnno = commandBuffer.current.match(/anno\s+(\d{4}|\d{8})(?=\s+fine anno)/i);
-        const matchGenere = commandBuffer.current.match(/genere\s+(.*?)(?=\s+fine genere)/i);
-
-        const titolo = matchTitle ? matchTitle[1].trim() : "";
-        const autore = matchAuthor ? matchAuthor[1].trim() : "";
-        const anno = matchAnno ? matchAnno[1].trim() : "";
-        const genere = matchGenere ? matchGenere[1].trim() : "";
-
-        console.log("Estratto:", { titolo, autore, anno, genere });
-
-        const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-        if (titolo) onFieldDetected('title', capitalize(titolo));
-        if (autore) onFieldDetected('author', capitalize(autore));
-        if (genere) onFieldDetected('genre', capitalize(genere));
-
-        if (anno) {
-          let dateObj = null;
-          if (/^\d{4}$/.test(anno)) {
-            dateObj = new Date(parseInt(anno), 0, 1);
-          } else if (/^\d{8}$/.test(anno)) {
-            const year = parseInt(anno.substring(0,4));
-            const month = parseInt(anno.substring(4,6)) - 1;
-            const day = parseInt(anno.substring(6,8));
-            dateObj = new Date(year, month, day);
-          }
-
-          if (dateObj && !isNaN(dateObj.getTime())) {
-            onFieldDetected('publishDate', dateObj);
-          } else {
-            console.warn("Data non valida da comando vocale:", anno);
-          }
+      if (transcript.includes("salva libro") || transcript.includes("conferma inserimento")) {
+        console.log("DEBUG: salva libro rilevato!");
+        if (submitButtonRef?.current) {
+          submitButtonRef.current.click();
         }
+        return;
+      }
 
-        setStatus(`Comando completato: Titolo: ${titolo}, Autore: ${autore}, Anno: ${anno}, Genere: ${genere}`);
+      if (listening) {
+        commandBuffer.current += " " + transcript;
+        console.log("DEBUG buffer:", commandBuffer.current);
 
-        commandBuffer.current = "";
-        setListening(false);
-        commandRecognition.stop();
-        try { commandRecognition.abort(); } catch {}
-
-        if (recognitionRef.current) {
-          try { recognitionRef.current.stop(); } catch {}
-          recognitionRef.current.start();
+        if (commandBuffer.current.includes("fine libreria")) {
+          processBufferedCommands();
         }
       }
     };
 
-    commandRecognition.onerror = (e) => {
-      console.error("Errore comando vocale:", e);
-      setStatus("Errore. Riprova a dire 'ok libreria' o clicca il bottone");
-      setListening(false);
-      commandBuffer.current = "";
-      commandRecognition.stop();
-      try { commandRecognition.abort(); } catch {}
-
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch {}
-        recognitionRef.current.start();
-      }
+    recognition.onerror = (e) => {
+      console.error("Errore riconoscimento:", e);
     };
 
-    commandRecognition.start();
+    try {
+      recognition.start();
+    } catch (err) {
+      console.warn("Errore avvio riconoscimento:", err);
+    }
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      try { recognition.stop(); } catch {}
+    };
+  }, [listening, submitButtonRef]);
+
+  const processBufferedCommands = () => {
+    const str = commandBuffer.current;
+
+    const matchTitle = str.match(/titolo\s+(.*?)(?=\s+fine titolo)/i);
+    const matchAuthor = str.match(/autore\s+(.*?)(?=\s+fine autore)/i);
+    const matchAnno = str.match(/anno\s+(\d{4}|\d{8})(?=\s+fine anno)/i);
+    const matchGenere = str.match(/genere\s+(.*?)(?=\s+fine genere)/i);
+
+    const titolo = matchTitle?.[1]?.trim() ?? "";
+    const autore = matchAuthor?.[1]?.trim() ?? "";
+    const anno = matchAnno?.[1]?.trim() ?? "";
+    const genere = matchGenere?.[1]?.trim() ?? "";
+
+    const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
+    if (titolo) onFieldDetected('title', capitalize(titolo));
+    if (autore) onFieldDetected('author', capitalize(autore));
+    if (genere) onFieldDetected('genre', capitalize(genere));
+
+    if (anno) {
+      let dateObj = null;
+      if (/^\d{4}$/.test(anno)) {
+        dateObj = new Date(parseInt(anno), 0, 1);
+      } else if (/^\d{8}$/.test(anno)) {
+        const y = parseInt(anno.substring(0,4));
+        const m = parseInt(anno.substring(4,6)) - 1;
+        const d = parseInt(anno.substring(6,8));
+        dateObj = new Date(y, m, d);
+      }
+      if (dateObj && !isNaN(dateObj.getTime())) {
+        onFieldDetected('publishDate', dateObj);
+      }
+    }
+
+    setStatus(`Comando completato: Titolo: ${titolo}, Autore: ${autore}, Anno: ${anno}, Genere: ${genere}`);
+    commandBuffer.current = "";
+    setListening(false);
   };
 
   return (
     <div style={{ marginTop: '20px', backgroundColor: '#f0f0f0', padding: '10px' }}>
       <p style={{ whiteSpace: 'pre-wrap' }}>{status}</p>
       <p style={{ fontSize: '12px', color: '#555' }}>
-        Puoi dire "ok libreria" per inserire i dati, o "salva libro" per confermare a voce.
+        ✅ Puoi dire:
+        <br />– <strong>"ok libreria"</strong> per iniziare a dettare i dati
+        <br />– <strong>"salva libro"</strong> o <strong>"conferma inserimento"</strong> per salvare
+        <br />– Ricorda di dire <strong>"fine titolo"</strong>, <strong>"fine autore"</strong>, ecc. dopo ogni campo
       </p>
       <button onClick={() => {
         if (!listening) {
-          setStatus(`Attivato manualmente! Ora puoi dire i comandi, chiudi con 'fine libreria'.
-Esempio:
+          setStatus(`Attivato manualmente! Ora puoi dire i comandi, chiudi con 'fine libreria'.\nEsempio:
 "titolo Il signore degli anelli fine titolo
 autore Tolkien fine autore
 anno 1954 fine anno
 genere Fantasy fine genere
 fine libreria"`);
           setListening(true);
-          startCommandRecognition();
         }
       }}>
         🎤 Attiva comando vocale
