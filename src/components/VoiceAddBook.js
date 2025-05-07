@@ -1,10 +1,48 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback  } from 'react';
 
 const VoiceAddBook = ({ onFieldDetected, submitButtonRef }) => {
   const [status, setStatus] = useState("In attesa di comandi vocali...");
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
   const commandBuffer = useRef("");
+
+  const processBufferedCommands =  useCallback(() => {
+    const str = commandBuffer.current;
+
+    const matchTitle = str.match(/titolo\s+(.*?)(?=\s+fine titolo)/i);
+    const matchAuthor = str.match(/autore\s+(.*?)(?=\s+fine autore)/i);
+    const matchAnno = str.match(/anno\s+(\d{4}|\d{8})(?=\s+fine anno)/i);
+    const matchGenere = str.match(/genere\s+(.*?)(?=\s+fine genere)/i);
+
+    const titolo = matchTitle?.[1]?.trim() ?? "";
+    const autore = matchAuthor?.[1]?.trim() ?? "";
+    const anno = matchAnno?.[1]?.trim() ?? "";
+    const genere = matchGenere?.[1]?.trim() ?? "";
+
+    const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
+    if (titolo) onFieldDetected('title', capitalize(titolo));
+    if (autore) onFieldDetected('author', capitalize(autore));
+    if (genere) onFieldDetected('genre', capitalize(genere));
+
+    if (anno) {
+      let dateObj = null;
+      if (/^\d{4}$/.test(anno)) {
+        dateObj = new Date(parseInt(anno), 0, 1);
+      } else if (/^\d{8}$/.test(anno)) {
+        const y = parseInt(anno.substring(0,4));
+        const m = parseInt(anno.substring(4,6)) - 1;
+        const d = parseInt(anno.substring(6,8));
+        dateObj = new Date(y, m, d);
+      }
+      if (dateObj && !isNaN(dateObj.getTime())) {
+        onFieldDetected('publishDate', dateObj);
+      }
+    }
+
+    setStatus(`Comando completato: Titolo: ${titolo}, Autore: ${autore}, Anno: ${anno}, Genere: ${genere}`);
+    commandBuffer.current = "";
+    setListening(false);
+  }, [onFieldDetected]);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -66,45 +104,9 @@ fine libreria"`);
     return () => {
       try { recognition.stop(); } catch {}
     };
-  }, [listening, submitButtonRef]);
+  }, [listening, submitButtonRef, processBufferedCommands]);
 
-  const processBufferedCommands = () => {
-    const str = commandBuffer.current;
-
-    const matchTitle = str.match(/titolo\s+(.*?)(?=\s+fine titolo)/i);
-    const matchAuthor = str.match(/autore\s+(.*?)(?=\s+fine autore)/i);
-    const matchAnno = str.match(/anno\s+(\d{4}|\d{8})(?=\s+fine anno)/i);
-    const matchGenere = str.match(/genere\s+(.*?)(?=\s+fine genere)/i);
-
-    const titolo = matchTitle?.[1]?.trim() ?? "";
-    const autore = matchAuthor?.[1]?.trim() ?? "";
-    const anno = matchAnno?.[1]?.trim() ?? "";
-    const genere = matchGenere?.[1]?.trim() ?? "";
-
-    const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
-    if (titolo) onFieldDetected('title', capitalize(titolo));
-    if (autore) onFieldDetected('author', capitalize(autore));
-    if (genere) onFieldDetected('genre', capitalize(genere));
-
-    if (anno) {
-      let dateObj = null;
-      if (/^\d{4}$/.test(anno)) {
-        dateObj = new Date(parseInt(anno), 0, 1);
-      } else if (/^\d{8}$/.test(anno)) {
-        const y = parseInt(anno.substring(0,4));
-        const m = parseInt(anno.substring(4,6)) - 1;
-        const d = parseInt(anno.substring(6,8));
-        dateObj = new Date(y, m, d);
-      }
-      if (dateObj && !isNaN(dateObj.getTime())) {
-        onFieldDetected('publishDate', dateObj);
-      }
-    }
-
-    setStatus(`Comando completato: Titolo: ${titolo}, Autore: ${autore}, Anno: ${anno}, Genere: ${genere}`);
-    commandBuffer.current = "";
-    setListening(false);
-  };
+  
 
   return (
     <div style={{ marginTop: '20px', backgroundColor: '#f0f0f0', padding: '10px' }}>
