@@ -1,77 +1,150 @@
 /* Bottoni generali */
 button {
-    padding: 10px 20px;
-    margin: 5px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    opacity: 0.8;
-  }
-  
-  /* Bottone Visualizza e Mostra Tutti */
-  button.show-all,
-  button.visualizza {
-    background-color: #4CAF50; /* Verde */
-    color: white;
-    margin-right: 10px; /* Distanza tra i bottoni */
-  }
-  
-  /* Bottone di modifica */
-  button.edit-btn {
-    background-color: #00BFFF; /* Azzurro */
-    color: white;
-  }
-  
-  /* Bottone di eliminazione */
-  button.delete-btn {
-    background-color: #FF6347; /* Arancione */
-    color: white;
-  }
-  
-  /* Modale centrata con sfondo traslucido */
-  .edit-book-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.7);
-    width: 80%;
-    max-width: 500px;
-    padding: 20px;
-    border-radius: 10px;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  .modal-form {
-    margin-bottom: 20px;
-  }
-  
-  .modal-form input {
-    width: 100%;
-    padding: 8px;
-    margin: 5px 0;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-  }
-  
-  button.close-btn {
-    background-color: #f44336;
-    color: white;
-  }
-  
-  button.save-btn {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
+  padding: 10px 20px;
+  margin: 5px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Bottone Visualizza e Mostra Tutti */
+button.show-all,
+button.visualizza {
+  background-color: #4CAF50; /* Verde */
+  color: white;
+  margin-right: 10px; /* Distanza tra i bottoni */
+}
+
+/* Bottone di modifica */
+button.edit-btn {
+  background-color: #00BFFF; /* Azzurro */
+  color: white;
+}
+
+/* Bottone di eliminazione */
+button.delete-btn {
+  background-color: #FF6347; /* Arancione */
+  color: white;
+}
+
+/* Modale centrata con sfondo traslucido */
+.edit-book-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  width: 80%;
+  max-width: 500px;
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-form {
+  margin-bottom: 20px;
+}
+
+.modal-form input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+button.close-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+button.save-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* ========== NUOVE AGGIUNTE PER LA TABELLA ========== */
+
+/* Distacco tra la sezione filtri e la tabella */
+.filters {
+  margin-bottom: 15px;
+}
+
+.filter-row {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Tabella elegante */
+.books-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  font-size: 0.95em;
+  background-color: #fff;
+}
+
+.books-table th,
+.books-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Intestazioni sticky per tabelle lunghe */
+.books-table th {
+  background-color: #f5f5f5;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Righe alternate */
+.books-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.books-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+/* Filtro colonna integrato */
+.books-table input[type="text"] {
+  width: 100%;
+  margin-top: 5px;
+  padding: 6px;
+  font-size: 0.9em;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Azioni generali */
+.action-buttons {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Container principale */
+.view-books-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
