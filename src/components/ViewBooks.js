@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from '../axiosInstance'; // usa l'istanza configurata 
 import './ViewBooks.css';  
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-
+import { jwtDecode } from 'jwt-decode';
 
 const FIELDS = ['titolo', 'autore', 'genere', 'anno'];
 
@@ -13,6 +13,15 @@ function ViewBooks() {
   const [showResults, setShowResults] = useState(false);
   const [editingBook, setEditingBook] = useState(null);  
   const [isModalOpen, setIsModalOpen] = useState(false);  
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+    if (token) {
+      const decoded = jwtDecode(token);
+      setIsAdmin(decoded.role === "ROLE_ADMIN");
+    }
+  }, []);
 
   const handleFieldToggle = (field) => {
     setFilters((prev) => {
@@ -27,27 +36,21 @@ function ViewBooks() {
   };
 
   const exportToExcel = () => {
-    console.log("books", books);  // ✅ log 1
     const worksheet = XLSX.utils.json_to_sheet(books);
-    console.log("worksheet['!ref']", worksheet['!ref']);  // ✅ log 2
-  
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Libreria");
-  
+
     if (worksheet['!ref']) {
       worksheet['!autofilter'] = { ref: worksheet['!ref'] };
     }
-  
+
     const maxColWidths = books.length > 0 ? Object.keys(books[0]).map(key => ({ wch: key.length + 10 })) : [];
     worksheet['!cols'] = maxColWidths;
-  
+
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(blob, 'Libreria.xlsx');
   };
-  
-  
 
   const handleInputChange = (field, value) => {
     setFilters((prev) => ({
@@ -100,8 +103,7 @@ function ViewBooks() {
   };
 
   const handleEdit = (book) => {
-    console.log("Modifica libro:", book); 
-    setEditingBook({ ...book });  // Assicura che i dati vengano copiati correttamente
+    setEditingBook({ ...book });
     setIsModalOpen(true);   
   };
 
@@ -164,7 +166,6 @@ function ViewBooks() {
         </button>
       </div>
 
-
       {showResults && books.length === 0 && <p>Nessun libro trovato.</p>}
 
       {showResults && books.length > 0 && (
@@ -172,46 +173,43 @@ function ViewBooks() {
           {books.map((book) => (
             <li key={book.id} className="book-item">
               <div className="book-info">
-                {Object.entries(book).map(([key, value]) => (
+              {Object.entries(book)
+                .filter(([key]) => isAdmin || key !== "user")
+                .map(([key, value]) => (
                   <div key={key}>
                     <strong>{key}:</strong> {value}
                   </div>
-                ))}
+              ))}
               </div>
               <div className="book-actions">
-                <button className="edit-btn" onClick={() => handleEdit(book)}>
-                  Modifica
-                </button>
-                <button className="delete-btn" onClick={() => handleDelete(book.id)}>
-                  Elimina
-                </button>
+                <button className="edit-btn" onClick={() => handleEdit(book)}>Modifica</button>
+                <button className="delete-btn" onClick={() => handleDelete(book.id)}>Elimina</button>
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      {/* Modale per la modifica */}
       {isModalOpen && editingBook && (
         <div className="edit-book-modal">
           <div className="modal-content">
             <h3>Modifica Libro</h3>
             <div className="modal-form">
-            {[
-              { label: 'Titolo', key: 'title' },
-              { label: 'Autore', key: 'author' },
-              { label: 'Genere', key: 'genre' },
-              { label: 'Data Pubblicazione', key: 'publishDate' }
-            ].map(({ label, key }) => (
-              <div key={key}>
-                <label>{label}</label>
-                <input
-                  type="text"
-                  value={editingBook[key] || ''}
-                  onChange={(e) => handleInputChangeModal(key, e.target.value)}
-                />
-              </div>
-            ))}
+              {[
+                { label: 'Titolo', key: 'title' },
+                { label: 'Autore', key: 'author' },
+                { label: 'Genere', key: 'genre' },
+                { label: 'Data Pubblicazione', key: 'publishDate' }
+              ].map(({ label, key }) => (
+                <div key={key}>
+                  <label>{label}</label>
+                  <input
+                    type="text"
+                    value={editingBook[key] || ''}
+                    onChange={(e) => handleInputChangeModal(key, e.target.value)}
+                  />
+                </div>
+              ))}
             </div>
             <button className="close-btn" onClick={handleCloseModal}>Chiudi</button>
             <button className="save-btn" onClick={handleSaveChanges}>Salva Modifiche</button>

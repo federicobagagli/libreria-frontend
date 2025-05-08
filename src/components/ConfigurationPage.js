@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import axios from '../axiosInstance'; // ✅ usa l'istanza configurata
 import "./ConfigurationPage.css";
 import TableDetailsModal from "./TableDetailsModal"; // lo creeremo dopo
@@ -40,6 +41,10 @@ const ConfigurationPage = () => {
           onClose={() => setSelectedTable(null)}
         />
       )}
+
+      <Link to="/user-management">
+        <button>Add User</button>
+      </Link>
     </div>
   );
 };

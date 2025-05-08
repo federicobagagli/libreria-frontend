@@ -5,9 +5,12 @@ import Sidebar from "./components/Sidebar";
 import ViewBooks from "./components/ViewBooks";
 import AddBook from "./components/AddBook.js";
 import ConfigurationPage from "./components/ConfigurationPage";
+import UserManagementPage from "./components/UserManagementPage";
 import LoginPage from "./components/LoginPage"; // nuovo componente
 import "./App.css";
 import backgroundImage from './assets/3d-background-with-white-cubes.jpg';
+import ProtectedRouteAdmin from "./components/ProtectedRouteAdmin";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -79,6 +82,14 @@ function App() {
             <Route path="/add" element={<AddBook />} />
             <Route path="/configurazione" element={<ConfigurationPage />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route
+              path="/user-management"
+              element={
+                <ProtectedRouteAdmin>
+                  <UserManagementPage />
+                </ProtectedRouteAdmin>
+              }
+            />
           </Routes>
         </main>
       </div>
