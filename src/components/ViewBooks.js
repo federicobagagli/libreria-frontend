@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import axios from '../axiosInstance'; // usa l'istanza configurata 
-import './ViewBooks.css';  
+import axios from '../axiosInstance';
+import './ViewBooks.css';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { jwtDecode } from 'jwt-decode';
@@ -11,9 +12,12 @@ function ViewBooks() {
   const [books, setBooks] = useState([]);
   const [filters, setFilters] = useState({});
   const [showResults, setShowResults] = useState(false);
-  const [editingBook, setEditingBook] = useState(null);  
-  const [isModalOpen, setIsModalOpen] = useState(false);  
+  const [editingBook, setEditingBook] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [tabularView, setTabularView] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [columnFilters, setColumnFilters] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
@@ -22,6 +26,8 @@ function ViewBooks() {
       setIsAdmin(decoded.role === "ROLE_ADMIN");
     }
   }, []);
+
+  const dynamicHeaders = books.length > 0 ? Object.keys(books[0]) : [];
 
   const handleFieldToggle = (field) => {
     setFilters((prev) => {
@@ -39,14 +45,8 @@ function ViewBooks() {
     const worksheet = XLSX.utils.json_to_sheet(books);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Libreria");
-
-    if (worksheet['!ref']) {
-      worksheet['!autofilter'] = { ref: worksheet['!ref'] };
-    }
-
-    const maxColWidths = books.length > 0 ? Object.keys(books[0]).map(key => ({ wch: key.length + 10 })) : [];
-    worksheet['!cols'] = maxColWidths;
-
+    if (worksheet['!ref']) worksheet['!autofilter'] = { ref: worksheet['!ref'] };
+    worksheet['!cols'] = books.length > 0 ? Object.keys(books[0]).map(key => ({ wch: key.length + 10 })) : [];
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(blob, 'Libreria.xlsx');
@@ -59,56 +59,100 @@ function ViewBooks() {
     }));
   };
 
-  const handleVisualizza = async () => {
-    const updatedFilters = {
-      title: filters['titolo'] || '',  
-      author: filters['autore'] || '',   
-      genre: filters['genere'] || '',    
-      year: filters['anno'] || '',       
-    };
+  const handleColumnFilterChange = (key, value) => {
+    setColumnFilters((prev) => ({
+      ...prev,
+      [key]: value
+    }));
+  };
 
+  const sortedBooks = React.useMemo(() => {
+    let filtered = [...books];
+    Object.entries(columnFilters).forEach(([key, val]) => {
+      if (val) {
+        filtered = filtered.filter(book =>
+          book[key] && book[key].toString().toLowerCase().includes(val.toLowerCase())
+        );
+      }
+    });
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+      
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+      
+        const aStr = aValue?.toString() || '';
+        const bStr = bValue?.toString() || '';
+        return sortConfig.direction === 'asc'
+          ? aStr.localeCompare(bStr)
+          : bStr.localeCompare(aStr);
+      });
+      
+    }
+    return filtered;
+  }, [books, sortConfig, columnFilters]);
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const handleVisualizza = async () => {
+    const queryParams = {
+      title: filters['titolo'] || '',
+      author: filters['autore'] || '',
+      genre: filters['genere'] || '',
+      year: filters['anno'] || ''
+    };
     try {
-      const response = await axios.get(`/books`, { params: updatedFilters });
+      const response = await axios.get("/books", { params: queryParams });
       setBooks(response.data);
     } catch (error) {
       console.error("Errore nella ricerca:", error);
       setBooks([]);
     } finally {
       setShowResults(true);
+      setTabularView(false);
     }
   };
 
   const handleMostraTutti = async () => {
     try {
-      const response = await axios.get(`/books/all`);
+      const response = await axios.get("/books/all");
       setBooks(response.data);
     } catch (error) {
       console.error("Errore nel caricamento di tutti i libri:", error);
       setBooks([]);
     } finally {
       setShowResults(true);
+      setTabularView(false);
     }
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm('Sei sicuro di voler eliminare questo libro?');
-    if (confirmDelete) {
+    if (window.confirm('Sei sicuro di voler eliminare questo libro?')) {
       try {
         await axios.delete(`/books/${id}`);
         filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
       } catch (error) {
-        console.error('Errore durante l\'eliminazione:', error);
+        console.error('Errore durante l eliminazione:', error);
       }
     }
   };
 
   const handleEdit = (book) => {
     setEditingBook({ ...book });
-    setIsModalOpen(true);   
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);  
+    setIsModalOpen(false);
   };
 
   const handleSaveChanges = async () => {
@@ -122,11 +166,10 @@ function ViewBooks() {
   };
 
   const handleInputChangeModal = (field, value) => {
-    setEditingBook((prev) => ({
-      ...prev,
-      [field]: value
-    }));
+    setEditingBook((prev) => ({ ...prev, [field]: value }));
   };
+
+  const toggleTabularView = () => setTabularView(!tabularView);
 
   return (
     <div className="view-books-container">
@@ -157,29 +200,59 @@ function ViewBooks() {
       <div className="action-buttons">
         <button className="visualizza" onClick={handleVisualizza}>Visualizza</button>
         <button className="show-all" onClick={handleMostraTutti}>Mostra tutti</button>
-        <button
-          className="export-excel"
-          onClick={exportToExcel}
-          disabled={books.length === 0}
-        >
-          Esporta Excel
-        </button>
+        <button className="export-excel" onClick={exportToExcel} disabled={books.length === 0}>Esporta Excel</button>
+        {showResults && books.length > 0 && (
+          <button onClick={toggleTabularView}>
+            {tabularView ? "Vista Elenco" : "Visualizza in Tabella"}
+          </button>
+        )}
       </div>
 
       {showResults && books.length === 0 && <p>Nessun libro trovato.</p>}
 
-      {showResults && books.length > 0 && (
+      {showResults && books.length > 0 && tabularView && (
+        <table className="books-table">
+          <thead>
+            <tr>
+              {dynamicHeaders.map((header) => (
+                <th key={header} onClick={() => handleSort(header)}>
+                  {header}
+                  {sortConfig.key === header && (sortConfig.direction === 'asc' ? ' ▲' : ' ▼')}
+                  <input
+                    type="text"
+                    placeholder="Filtra"
+                    value={columnFilters[header] || ''}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => handleColumnFilterChange(header, e.target.value)}
+                  />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedBooks.map((book, i) => (
+              <tr key={i}>
+                {dynamicHeaders.map((key) => (
+                  <td key={key}>{book[key]}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {showResults && books.length > 0 && !tabularView && (
         <ul className="books-list">
           {books.map((book) => (
             <li key={book.id} className="book-item">
               <div className="book-info">
-              {Object.entries(book)
-                .filter(([key]) => isAdmin || key !== "user")
-                .map(([key, value]) => (
-                  <div key={key}>
-                    <strong>{key}:</strong> {value}
-                  </div>
-              ))}
+                {Object.entries(book)
+                  .filter(([key]) => isAdmin || key !== "user")
+                  .map(([key, value]) => (
+                    <div key={key}>
+                      <strong>{key}:</strong> {value}
+                    </div>
+                  ))}
               </div>
               <div className="book-actions">
                 <button className="edit-btn" onClick={() => handleEdit(book)}>Modifica</button>
