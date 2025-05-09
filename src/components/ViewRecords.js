@@ -132,9 +132,6 @@ function ViewRecords() {
   }
 };
 
-  const handleInputChangeModal = (field, value) => {
-    setEditingRecord((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handleDelete = async (id) => {
     if (window.confirm('Sei sicuro di voler eliminare questo disco?')) {
