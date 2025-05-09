@@ -20,6 +20,21 @@ function ViewRecords() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [columnFilters, setColumnFilters] = useState({});
 
+  const FIELD_LABELS = {
+    cdNumber: 'Numero CD',
+    drawer: 'Cassetto',
+    composerAuthor: 'Compositore / Autore',
+    albumTitle: 'Titolo Album',
+    trackTitle: 'Titolo Brano',
+    ensemble: 'Organico',
+    compositionDate: 'Data Composizione',
+    performers: 'Interpreti',
+    genre: 'Genere',
+    id: 'ID',
+    user: 'Utente'
+};
+
+
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
@@ -134,15 +149,28 @@ function ViewRecords() {
     setIsModalOpen(false);
   };
 
-  const handleSaveChanges = async () => {
-    try {
-      await axios.put(`/records/${editingRecord.id}`, editingRecord);
-      setIsModalOpen(false);
-      filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
-    } catch (error) {
-      console.error('Errore nel salvataggio delle modifiche:', error);
+  const handleSaveChanges = async (updatedRecord) => {
+  console.log('Tentativo di salvataggio del record:', updatedRecord);
+  try {
+    await axios.put(`/records/${updatedRecord.id}`, updatedRecord);
+    console.log('Salvataggio riuscito');
+    setIsModalOpen(false);
+
+    if (filters && Object.keys(filters).length > 0) {
+      await handleVisualizza();
+    } else {
+      await handleMostraTutti();
     }
-  };
+
+    // ✅ Ripristina la visualizzazione corrente
+    setTabularView(tabularView);
+
+  } catch (error) {
+    console.error('Errore nel salvataggio delle modifiche:', error);
+  }
+};
+
+
 
 
 
@@ -163,10 +191,10 @@ function ViewRecords() {
       <h2>Filtra per</h2>
       <div className="filters">
         {FIELDS.map((field) => (
-          <div key={field} className="filter-row">
+          <div key={FIELD_LABELS[field] || field} className="filter-row">
             <label>
               <input type="checkbox" checked={filters.hasOwnProperty(field)} onChange={() => handleFieldToggle(field)} />
-              {field}
+              {FIELD_LABELS[field] || field}
             </label>
             {filters.hasOwnProperty(field) && (
               <input type="text" placeholder={`Inserisci ${field}`} value={filters[field]} onChange={(e) => handleInputChange(field, e.target.value)} />
@@ -190,8 +218,8 @@ function ViewRecords() {
             <tr>
               <th>Azioni</th>
               {dynamicHeaders.map((header) => (
-                <th key={header} onClick={() => handleSort(header)}>
-                  {header}
+                <th key={FIELD_LABELS[header] || header} onClick={() => handleSort(header)}>
+                  {FIELD_LABELS[header] || header}
                   {sortConfig.key === header && (sortConfig.direction === 'asc' ? ' ▲' : ' ▼')}
                   <input type="text" placeholder="Filtra" value={columnFilters[header] || ''} onClick={(e) => e.stopPropagation()} onChange={(e) => handleColumnFilterChange(header, e.target.value)} />
                 </th>
@@ -219,7 +247,7 @@ function ViewRecords() {
             <li key={record.id} className="book-item">
               <div className="book-info">
                 {Object.entries(record).filter(([key]) => isAdmin || key !== 'user').map(([key, value]) => (
-                  <div key={key}><strong>{key}:</strong> {value}</div>
+                  <div key={key}><strong>{FIELD_LABELS[key] || key}:</strong> {value}</div>
                 ))}
               </div>
               <div className="book-actions">

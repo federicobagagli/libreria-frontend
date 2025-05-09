@@ -3,6 +3,20 @@ import React, { useState, useEffect } from 'react';
 const EditRecordModal = ({ record, onSave, onClose }) => {
   const [editedRecord, setEditedRecord] = useState({ ...record });
 
+  const FIELD_LABELS = {
+    cdNumber: 'Numero CD',
+    drawer: 'Cassetto',
+    composerAuthor: 'Compositore / Autore',
+    albumTitle: 'Titolo Album',
+    trackTitle: 'Titolo Brano',
+    ensemble: 'Organico',
+    compositionDate: 'Data Composizione',
+    performers: 'Interpreti',
+    genre: 'Genere',
+    id: 'ID',
+    user: 'Utente'
+};
+
   useEffect(() => {
     setEditedRecord({ ...record });
   }, [record]);
@@ -30,7 +44,7 @@ const EditRecordModal = ({ record, onSave, onClose }) => {
           {Object.entries(editedRecord).map(([key, value]) => (
             key !== 'id' && (
               <div key={key} style={{ marginBottom: 10 }}>
-                <label>{key}:</label>
+                <label>{FIELD_LABELS[key] || key}:</label>
                 <input
                   type="text"
                   value={value}
