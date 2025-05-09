@@ -10,6 +10,9 @@ import LoginPage from "./components/LoginPage"; // nuovo componente
 import "./App.css";
 import backgroundImage from './assets/3d-background-with-white-cubes.jpg';
 import ProtectedRouteAdmin from "./components/ProtectedRouteAdmin";
+import ViewRecords from "./components/ViewRecords";
+import AddRecord from "./components/AddRecord";
+
 
 
 function App() {
@@ -82,6 +85,8 @@ function App() {
             <Route path="/add" element={<AddBook />} />
             <Route path="/configurazione" element={<ConfigurationPage />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/records" element={<ViewRecords />} />
+            <Route path="/add-record" element={<AddRecord />} />
             <Route
               path="/user-management"
               element={

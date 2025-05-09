@@ -26,6 +26,10 @@ const Sidebar = ({ onLogout }) => {
         <li>
           <Link to="/add">Inserisci Libro</Link>
         </li>
+        <li><Link to="/records">Visualizza Discoteca</Link></li>
+        <li>
+            <Link to="/add-record">Inserisci Disco</Link>
+        </li>
         {role === 'ROLE_ADMIN' && (
           <li>
             <Link to="/configurazione">Configurazione</Link>
