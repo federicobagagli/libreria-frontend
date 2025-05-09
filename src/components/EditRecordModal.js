@@ -22,7 +22,7 @@ const EditRecordModal = ({ record, onSave, onClose }) => {
     <div className="modal-overlay" style={{
       position: 'fixed', top: 0, left: 0, width: '100vw',
       height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)',
-      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
     }}>
       <div className="modal-content" style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
         <h3>Modifica Disco</h3>

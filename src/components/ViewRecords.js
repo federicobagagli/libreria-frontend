@@ -113,6 +113,18 @@ function ViewRecords() {
     }
   };
 
+  const refetchRecords = async () => {
+  try {
+    const response = filters && Object.keys(filters).length > 0
+      ? await axios.get('/records', { params: filters })
+      : await axios.get('/records/all');
+    setRecords(response.data);
+  } catch (error) {
+    console.error('Errore nel caricamento:', error);
+    setRecords([]);
+  }
+};
+
   const handleEdit = (record) => {
     setEditingRecord({ ...record });
     setIsModalOpen(true);
@@ -122,28 +134,28 @@ function ViewRecords() {
     setIsModalOpen(false);
   };
 
-  const handleSaveChanges = async (updatedRecord) => {
-  try {
-    await axios.put(`/records/${updatedRecord.id}`, updatedRecord);
-    setIsModalOpen(false);
-    filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
-  } catch (error) {
-    console.error('Errore nel salvataggio delle modifiche:', error);
-  }
-};
-
-
-  const handleDelete = async (id) => {
-    if (window.confirm('Sei sicuro di voler eliminare questo disco?')) {
-      try {
-        await axios.delete(`/records/${id}`);
-        filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
-      } catch (error) {
-        console.error('Errore durante l\'eliminazione:', error);
-      }
+  const handleSaveChanges = async () => {
+    try {
+      await axios.put(`/records/${editingRecord.id}`, editingRecord);
+      setIsModalOpen(false);
+      filters && Object.keys(filters).length ? handleVisualizza() : handleMostraTutti();
+    } catch (error) {
+      console.error('Errore nel salvataggio delle modifiche:', error);
     }
   };
 
+
+
+  const handleDelete = async (id) => {
+  if (window.confirm('Sei sicuro di voler eliminare questo disco?')) {
+    try {
+      await axios.delete(`/records/${id}`);
+      await refetchRecords(); // ✅ aggiorna la lista ma NON cambia vista
+    } catch (error) {
+      console.error('Errore durante l\'eliminazione:', error);
+    }
+  }
+};
   const toggleTabularView = () => setTabularView(!tabularView);
 
   return (
@@ -176,6 +188,7 @@ function ViewRecords() {
         <table className="books-table">
           <thead>
             <tr>
+              <th>Azioni</th>
               {dynamicHeaders.map((header) => (
                 <th key={header} onClick={() => handleSort(header)}>
                   {header}
@@ -188,8 +201,14 @@ function ViewRecords() {
           <tbody>
             {sortedRecords.map((record, i) => (
               <tr key={i}>
-                {dynamicHeaders.map((key) => <td key={key}>{record[key]}</td>)}
-              </tr>
+                <td>
+                    <button onClick={() => handleEdit(record)} style={{ fontSize: '14px', padding: '4px 6px', marginRight: '4px' }}>✏️</button>
+                    <button onClick={() => handleDelete(record.id)}style={{ fontSize: '14px', padding: '4px 6px' }}>🗑️</button>
+                </td>
+                {dynamicHeaders.map((key) => (
+                    <td key={key}>{record[key]}</td>
+                ))}
+               </tr>
             ))}
           </tbody>
         </table>
@@ -222,5 +241,7 @@ function ViewRecords() {
     </div>
   );
 }
+
+
 
 export default ViewRecords;
