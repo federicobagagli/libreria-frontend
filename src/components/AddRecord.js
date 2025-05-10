@@ -83,8 +83,9 @@ const AddRecord = () => {
             showMonthDropdown
             showYearDropdown
             dropdownMode="select"
-            yearDropdownItemNumber={300}
+            yearDropdownItemNumber={900}
             scrollableYearDropdown
+            minDate={new Date(1200, 0, 1)}
           />
         </div>
         <div><label>Interpreti</label><input type="text" value={formData.performers} onChange={(e) => handleChange('performers', e.target.value)}  /></div>

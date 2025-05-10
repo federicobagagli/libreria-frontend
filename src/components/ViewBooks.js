@@ -5,6 +5,9 @@ import './ViewBooks.css';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { jwtDecode } from 'jwt-decode';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 const FIELDS = ['titolo', 'autore', 'genere', 'anno'];
 
@@ -263,32 +266,50 @@ function ViewBooks() {
         </ul>
       )}
 
-      {isModalOpen && editingBook && (
-        <div className="edit-book-modal">
-          <div className="modal-content">
-            <h3>Modifica Libro</h3>
-            <div className="modal-form">
-              {[
-                { label: 'Titolo', key: 'title' },
-                { label: 'Autore', key: 'author' },
-                { label: 'Genere', key: 'genre' },
-                { label: 'Data Pubblicazione', key: 'publishDate' }
-              ].map(({ label, key }) => (
-                <div key={key}>
-                  <label>{label}</label>
-                  <input
-                    type="text"
-                    value={editingBook[key] || ''}
-                    onChange={(e) => handleInputChangeModal(key, e.target.value)}
-                  />
-                </div>
-              ))}
-            </div>
-            <button className="close-btn" onClick={handleCloseModal}>Chiudi</button>
-            <button className="save-btn" onClick={handleSaveChanges}>Salva Modifiche</button>
+     {isModalOpen && editingBook && (
+  <div className="edit-book-modal">
+    <div className="modal-content">
+      <h3>Modifica Libro</h3>
+      <div className="modal-form">
+        {[
+          { label: 'Titolo', key: 'title' },
+          { label: 'Autore', key: 'author' },
+          { label: 'Genere', key: 'genre' },
+          { label: 'Data Pubblicazione', key: 'publishDate' }
+        ].map(({ label, key }) => (
+          <div key={key}>
+            <label>{label}</label>
+            {key === 'publishDate' ? (
+              <DatePicker
+                selected={editingBook[key] ? new Date(editingBook[key]) : null}
+                onChange={(date) =>
+                  handleInputChangeModal(key, date ? format(date, 'yyyy-MM-dd') : '')
+                }
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Seleziona una data"
+                className="custom-datepicker"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                yearDropdownItemNumber={150}
+                scrollableYearDropdown
+              />
+            ) : (
+              <input
+                type="text"
+                value={editingBook[key] || ''}
+                onChange={(e) => handleInputChangeModal(key, e.target.value)}
+              />
+            )}
           </div>
-        </div>
-      )}
+        ))}
+      </div>
+      <button className="close-btn" onClick={handleCloseModal}>Chiudi</button>
+      <button className="save-btn" onClick={handleSaveChanges}>Salva Modifiche</button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
