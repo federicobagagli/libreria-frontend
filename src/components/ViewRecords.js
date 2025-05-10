@@ -26,7 +26,7 @@ function ViewRecords() {
     composerAuthor: 'Compositore / Autore',
     albumTitle: 'Titolo Album',
     trackTitle: 'Titolo Brano',
-    ensemble: 'Organico',
+    ensemble: 'Direttore/Orchestra',
     soloists : "Solisti",
     compositionDate: 'Data Composizione',
     performers: 'Interpreti',
