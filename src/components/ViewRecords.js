@@ -7,7 +7,7 @@ import { saveAs } from 'file-saver';
 import { jwtDecode } from 'jwt-decode';
 import EditRecordModal from './EditRecordModal';
 
-const FIELDS = ['cdNumber', 'drawer', 'composerAuthor', 'albumTitle', 'trackTitle', 'ensemble', 'compositionDate', 'performers', 'genre'];
+const FIELDS = ['cdNumber', 'drawer', 'composerAuthor', 'albumTitle', 'trackTitle', 'ensemble', 'soloists', 'compositionDate', 'performers', 'genre'];
 
 function ViewRecords() {
   const [records, setRecords] = useState([]);
@@ -27,6 +27,7 @@ function ViewRecords() {
     albumTitle: 'Titolo Album',
     trackTitle: 'Titolo Brano',
     ensemble: 'Organico',
+    soloists : "Solisti",
     compositionDate: 'Data Composizione',
     performers: 'Interpreti',
     genre: 'Genere',

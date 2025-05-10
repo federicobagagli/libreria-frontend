@@ -52,6 +52,7 @@ const AddRecord = () => {
         albumTitle: '',
         trackTitle: '',
         ensemble: '',
+        soloists: '',
         compositionDate: null,
         performers: '',
         genre: ''
@@ -72,6 +73,7 @@ const AddRecord = () => {
         <div><label>Titolo Album</label><input type="text" value={formData.albumTitle} onChange={(e) => handleChange('albumTitle', e.target.value)}  /></div>
         <div><label>Titolo Brano</label><input type="text" value={formData.trackTitle} onChange={(e) => handleChange('trackTitle', e.target.value)}  /></div>
         <div><label>Organico</label><input type="text" value={formData.ensemble} onChange={(e) => handleChange('ensemble', e.target.value)}  /></div>
+        <div><label>Solisti</label><input type="text" value={formData.soloists} onChange={(e) => handleChange('soloists', e.target.value)}/></div>
         <div className="datepicker-container">
           <label>Data Composizione</label>
           <DatePicker
