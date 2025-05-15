@@ -12,7 +12,8 @@ const EditRecordModal = ({ record, onSave, onClose }) => {
     composerAuthor: 'Compositore / Autore',
     albumTitle: 'Titolo Album',
     trackTitle: 'Titolo Brano',
-    ensemble: 'Organico',
+    ensemble: 'Direttore/Orchestra',
+    soloists: 'Solisti',
     compositionDate: 'Data Composizione',
     performers: 'Interpreti',
     genre: 'Genere',
@@ -41,7 +42,14 @@ const EditRecordModal = ({ record, onSave, onClose }) => {
       height: '100vh', backgroundColor: 'rgba(0,0,0,0.5)',
       display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
     }}>
-      <div className="modal-content" style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, minWidth: 400 }}>
+      <div className="modal-content" style={{
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        minWidth: 400,
+        maxHeight: '80vh',
+        overflowY: 'auto'
+      }}>
         <h3>Modifica Disco</h3>
         <form onSubmit={handleSubmit}>
           {Object.entries(editedRecord).map(([key, value]) => (
